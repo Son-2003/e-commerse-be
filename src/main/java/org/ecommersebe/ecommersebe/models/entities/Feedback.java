@@ -35,7 +35,7 @@ public class Feedback extends BaseEntity{
     @JoinColumn(name = "user_Id", nullable = false)
     private User user;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "order_Id", nullable = false)
     private Order order;
 }

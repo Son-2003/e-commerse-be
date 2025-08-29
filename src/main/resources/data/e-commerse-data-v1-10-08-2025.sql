@@ -7,7 +7,7 @@ VALUES (
            false,
            'A lightweight, usually knitted, pullover shirt, close-fitting and with a round neckline and short sleeves, worn as an undershirt or outer garment.',
            'ACTIVE',
-           'https://res.cloudinary.com/dpysbryyk/image/upload/v1754811583/E-commerse/bartal4n3fjkcphtn7gz.png',
+           'https://res.cloudinary.com/dpysbryyk/image/upload/v1754811583/E-commerse/products/bartal4n3fjkcphtn7gz.png',
            'WOMEN',
            'TOP'
        ),(
@@ -16,7 +16,7 @@ VALUES (
            false,
            'A lightweight, usually knitted, pullover shirt, close-fitting and with a round neckline and short sleeves, worn as an undershirt or outer garment.',
            'ACTIVE',
-           'https://res.cloudinary.com/dpysbryyk/image/upload/v1754811599/E-commerse/sdnyuboiucs3hok6ltnj.png,https://res.cloudinary.com/dpysbryyk/image/upload/v1754811600/E-commerse/hrs7fu3eerc9wr8pjwls.png,https://res.cloudinary.com/dpysbryyk/image/upload/v1754811600/E-commerse/ihydn4c61jwklr4cbhtj.png,https://res.cloudinary.com/dpysbryyk/image/upload/v1754811600/E-commerse/dmhnffiyfeqfip2nhzwu.png,https://res.cloudinary.com/dpysbryyk/image/upload/v1754811602/E-commerse/v3h8zuqfafh7ehfvfyor.png',
+           'https://res.cloudinary.com/dpysbryyk/image/upload/v1754811602/E-commerse/products/v3h8zuqfafh7ehfvfyor.png,https://res.cloudinary.com/dpysbryyk/image/upload/v1754811600/E-commerse/products/dmhnffiyfeqfip2nhzwu.png,https://res.cloudinary.com/dpysbryyk/image/upload/v1754811600/E-commerse/products/ihydn4c61jwklr4cbhtj.png,https://res.cloudinary.com/dpysbryyk/image/upload/v1754811600/E-commerse/products/hrs7fu3eerc9wr8pjwls.png',
            'MEN',
            'TOP'
        ),(
@@ -25,7 +25,7 @@ VALUES (
            false,
            'A lightweight, usually knitted, pullover shirt, close-fitting and with a round neckline and short sleeves, worn as an undershirt or outer garment.',
            'ACTIVE',
-           'https://res.cloudinary.com/dpysbryyk/image/upload/v1754811608/E-commerse/o92s3f3tnnqfzlupyue3.png',
+           'https://res.cloudinary.com/dpysbryyk/image/upload/v1754811608/E-commerse/products/btzl3ievxsdtyzbldtpg.png',
            'KIDS',
            'TOP'
        ),(
@@ -34,7 +34,7 @@ VALUES (
            false,
            'A lightweight, usually knitted, pullover shirt, close-fitting and with a round neckline and short sleeves, worn as an undershirt or outer garment.',
            'ACTIVE',
-           'https://res.cloudinary.com/dpysbryyk/image/upload/v1754811608/E-commerse/btzl3ievxsdtyzbldtpg.png',
+           'https://res.cloudinary.com/dpysbryyk/image/upload/v1754811608/E-commerse/products/o92s3f3tnnqfzlupyue3.png',
            'MEN',
            'TOP'
        ),(
@@ -43,7 +43,7 @@ VALUES (
            false,
            'A lightweight, usually knitted, pullover shirt, close-fitting and with a round neckline and short sleeves, worn as an undershirt or outer garment.',
            'ACTIVE',
-           'https://res.cloudinary.com/dpysbryyk/image/upload/v1754811608/E-commerse/j9vtgaodlwmieox1s89k.png',
+           'https://res.cloudinary.com/dpysbryyk/image/upload/v1754811608/E-commerse/products/j9vtgaodlwmieox1s89k.png',
            'WOMEN',
            'TOP'
        );
@@ -66,7 +66,7 @@ VALUES (
        );
 
 
-INSERT INTO "user" (email, full_name, image, password, phone, status, role)
-VALUES ('nguyenducson@gmail.com',  'Đức Sơn',
+INSERT INTO "user" (email, full_name, image, password, phone, status, role, address)
+VALUES ('nguyenducson2915@gmail.com',  'Đức Sơn',
         'https://res.cloudinary.com/dpysbryyk/image/upload/v1717827115/Milk/UserDefault/dfzhxjcbnixmp8aybnge.jpg',
-        '$2a$10$AoQP4YPkiYzqFOvwH8toyujM2Aje6p5l3dbL2/uJblcpMyWpSMJdq', '1111111111', 'ACTIVE', 'CUSTOMER')
+        '$2a$10$AoQP4YPkiYzqFOvwH8toyujM2Aje6p5l3dbL2/uJblcpMyWpSMJdq', '1111111111', 'ACTIVE', 'CUSTOMER', 'abc')

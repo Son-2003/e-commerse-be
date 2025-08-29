@@ -12,12 +12,12 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SizeRequest {
-    private Long id;
+     Long id;
 
     @NotBlank(message = "Name cannot be blank")
-    private String name;
+     String name;
 
     @NotNull(message = "Quantity cannot be null")
     @Min(value = 0, message = "Quantity is greater than 0")
-    private int quantity;
+     int quantity;
 }

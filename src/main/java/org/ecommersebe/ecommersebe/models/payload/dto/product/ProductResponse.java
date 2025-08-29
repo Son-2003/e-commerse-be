@@ -15,23 +15,23 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductResponse {
-    private Long id;
+     Long id;
 
-    private String name;
+     String name;
 
-    private float price;
+     float price;
 
-    private boolean isBestSeller;
+     boolean isBestSeller;
 
-    private String description;
+     String description;
 
-    private EntityStatus status;
+     EntityStatus status;
 
-    private String image;
+     String image;
 
-    private Category category;
+     Category category;
 
-    private SubCategory subCategory;
+     SubCategory subCategory;
 
-    private List<SizeResponse> sizes;
+     List<SizeResponse> sizes;
 }

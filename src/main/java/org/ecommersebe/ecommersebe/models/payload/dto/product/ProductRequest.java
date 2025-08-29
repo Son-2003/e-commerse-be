@@ -15,21 +15,23 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductRequest {
-    private String name;
+     Long id;
 
-    private float price;
+     String name;
 
-    private boolean isBestSeller;
+     float price;
 
-    private String description;
+     boolean isBestSeller;
 
-    private EntityStatus status;
+     String description;
 
-    private String image;
+     EntityStatus status;
 
-    private Category category;
+     String image;
 
-    private SubCategory subCategory;
+     Category category;
 
-    private List<SizeRequest> sizes;
+     SubCategory subCategory;
+
+     List<SizeRequest> sizes;
 }

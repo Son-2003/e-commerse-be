@@ -1,4 +1,4 @@
-package org.ecommersebe.ecommersebe.models.payload.dto.size;
+package org.ecommersebe.ecommersebe.models.payload.dto.feedback;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,10 +8,9 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SizeResponse {
+public class FeedbackResponse {
      Long id;
-
-     String name;
-
-     int quantity;
+     int rating;
+     String comments;
+     String image;
 }

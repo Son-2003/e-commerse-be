@@ -23,27 +23,38 @@ public class Order extends BaseEntity{
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus;
+    private OrderStatus status;
 
     @Column(nullable = false)
     private boolean isFeedback;
 
     @Column(nullable = false)
-    private float totalAmount;
+    private String address;
 
     @Column(nullable = false)
-    private float amount;
+    private String fullName;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String phone;
+
+    @Column(nullable = false)
+    private float totalAmount;
+
+    private String note;
 
     @ManyToOne
-    @JoinColumn(name = "user_Id", nullable = false)
+    @JoinColumn(name = "user_Id", nullable = true)
     private User user;
-
-    @OneToMany(mappedBy = "order")
-    private Set<OrderDetail> orderDetails;
 
     @OneToOne(mappedBy = "order")
     private PaymentHistory paymentHistory;
 
+    @OneToOne(mappedBy = "order")
+    private Feedback feedback;
+
     @OneToMany(mappedBy = "order")
-    private Set<Feedback> feedback;
+    private Set<OrderDetail> orderDetails;
 }

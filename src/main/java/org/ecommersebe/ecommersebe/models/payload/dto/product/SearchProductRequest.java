@@ -15,11 +15,11 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SearchProductRequest {
-    private String name;
+     String name;
 
-    List<EntityStatus> statuses;
+     List<EntityStatus> statuses;
 
-    List<SubCategory> subCategories;
+     List<SubCategory> subCategories;
 
-    List<Category> categories;
+     List<Category> categories;
 }

@@ -66,6 +66,7 @@ public class AuthController {
     @Operation(
             summary = "Refresh token"
     )
+    @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/refresh-token")
     public ResponseEntity<JWTAuthResponse> refreshToken(
             HttpServletRequest request,

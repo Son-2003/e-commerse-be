@@ -22,17 +22,17 @@ import java.time.ZonedDateTime;
 @MappedSuperclass
 public abstract class BaseEntity {
     @CreatedBy
-    @Column(name = "created_by", nullable = false, updatable = false)
+    @Column(name = "created_by", nullable = true, updatable = false)
     private String createdBy;
 
-    @Column(name = "created_date",nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_date",nullable = true, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdDate;
 
     @LastModifiedBy
-    @Column(name = "modified_by", insertable = false)
+    @Column(name = "modified_by", insertable = true)
     private String modifiedBy;
 
-    @Column(name = "modified_date", insertable = false)
+    @Column(name = "modified_date", insertable = true)
     private LocalDateTime modifiedDate;
 
     @PrePersist

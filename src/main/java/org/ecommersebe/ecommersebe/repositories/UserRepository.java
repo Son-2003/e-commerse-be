@@ -2,6 +2,8 @@ package org.ecommersebe.ecommersebe.repositories;
 
 
 import org.ecommersebe.ecommersebe.models.entities.User;
+import org.ecommersebe.ecommersebe.models.enums.EntityStatus;
+import org.ecommersebe.ecommersebe.models.enums.RoleType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -9,4 +11,5 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmailOrPhone(String email, String phone);
     Boolean existsByEmail(String email);
+    int countUsersByStatusEqualsAndRoleEquals(EntityStatus status, RoleType role);
 }

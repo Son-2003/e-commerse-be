@@ -56,6 +56,7 @@ public class SecurityConfig {
                         authorize.requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/products/search").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/orders").permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/**").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/**").permitAll()
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

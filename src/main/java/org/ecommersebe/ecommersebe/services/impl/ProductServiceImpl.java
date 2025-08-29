@@ -1,6 +1,5 @@
 package org.ecommersebe.ecommersebe.services.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.ecommersebe.ecommersebe.models.entities.Product;
 import org.ecommersebe.ecommersebe.models.payload.dto.product.ProductResponse;
 import org.ecommersebe.ecommersebe.models.payload.dto.product.ProductRequest;
@@ -99,7 +98,4 @@ public class ProductServiceImpl extends BaseServiceImpl<Product, ProductRequest,
 
         return params;
     }
-
-
-
 }

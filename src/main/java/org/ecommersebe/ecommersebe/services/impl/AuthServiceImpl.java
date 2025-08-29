@@ -135,10 +135,10 @@ public class AuthServiceImpl implements AuthService {
         String token = authHeader.substring(7);
 
         // extract username from token
-        String username = jwtTokenProvider.getUsernameFromJwt(token);
+        String email = jwtTokenProvider.getUsernameFromJwt(token);
 
         // check if the user exist in database
-        User user = userRepository.findByEmailOrPhone(username, username)
+        User user = userRepository.findByEmailOrPhone(email, email)
                 .orElseThrow(()->new RuntimeException("No user found"));
 
         // check if the token is valid
@@ -184,7 +184,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(signUpRequest.getPassword());
         user.setPhone(signUpRequest.getPhone());
         user.setRole(roleType);
-        user.setImage("https://res.cloudinary.com/dpysbryyk/image/upload/v1717827115/Milk/UserDefault/dfzhxjcbnixmp8aybnge.jpg");
+        user.setImage(signUpRequest.getImage());
         user.setStatus(EntityStatus.ACTIVE);
 
         return user;

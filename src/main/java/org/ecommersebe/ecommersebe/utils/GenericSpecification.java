@@ -33,6 +33,10 @@ public class GenericSpecification {
         return (root, query, builder) -> builder.like(builder.lower(root.join(joinField).get(fieldName)), "%" + keyword.toLowerCase().trim() + "%");
     }
 
+    public static <T> Specification<T> joinFieldEqual(String joinField, String fieldName, Object value) {
+        return (root, query, builder) -> builder.equal(root.join(joinField).get(fieldName), value);
+    }
+
     public static <T> Specification<T> joinFieldIn(String joinField, String fieldName, Collection<?> values) {
         return (root, query, builder) -> root.join(joinField).get(fieldName).in(values);
     }

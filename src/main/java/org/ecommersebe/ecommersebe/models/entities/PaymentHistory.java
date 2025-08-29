@@ -3,6 +3,7 @@ package org.ecommersebe.ecommersebe.models.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.ecommersebe.ecommersebe.models.enums.PaymentStatus;
+import org.ecommersebe.ecommersebe.models.enums.PaymentType;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -26,6 +27,10 @@ public class PaymentHistory extends BaseEntity{
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PaymentType type;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "order_Id", nullable = false)

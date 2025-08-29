@@ -3,7 +3,6 @@ package org.ecommersebe.ecommersebe.models.payload.dto.auth;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,8 +25,6 @@ public class SignUpRequest {
 
     @NotBlank(message = "FullName cannot be blank")
     private String fullName;
-
-    @NotBlank(message = "Phone cannot be blank")
-    @Pattern(regexp = AppConstants.PHONE_REGEX, message = "Invalid phone number!")
     private String phone;
+    private String image;
 }

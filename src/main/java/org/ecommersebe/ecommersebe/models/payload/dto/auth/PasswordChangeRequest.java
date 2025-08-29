@@ -1,18 +1,17 @@
 package org.ecommersebe.ecommersebe.models.payload.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PasswordChangeRequest {
     @NotBlank(message = "Old password must not be blank")
-    private String oldPassword;
+    String oldPassword;
     @NotBlank(message = "New password must not be blank")
-    private String newPassword;
+    String newPassword;
 }
