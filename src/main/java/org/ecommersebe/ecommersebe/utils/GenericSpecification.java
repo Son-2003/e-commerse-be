@@ -37,6 +37,10 @@ public class GenericSpecification {
         return (root, query, builder) -> builder.equal(root.join(joinField).get(fieldName), value);
     }
 
+    public static <T, U extends Comparable<? super U>> Specification<T> fieldEqual(String fieldName, U value) {
+        return (root, query, builder) -> builder.equal(root.get(fieldName),value);
+    }
+
     public static <T> Specification<T> joinFieldIn(String joinField, String fieldName, Collection<?> values) {
         return (root, query, builder) -> root.join(joinField).get(fieldName).in(values);
     }

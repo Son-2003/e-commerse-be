@@ -1,6 +1,7 @@
 package org.ecommersebe.ecommersebe.services.impl;
 
 import org.ecommersebe.ecommersebe.models.entities.Product;
+import org.ecommersebe.ecommersebe.models.enums.EntityStatus;
 import org.ecommersebe.ecommersebe.models.payload.dto.product.ProductResponse;
 import org.ecommersebe.ecommersebe.models.payload.dto.product.ProductRequest;
 import org.ecommersebe.ecommersebe.models.payload.dto.product.SearchProductRequest;

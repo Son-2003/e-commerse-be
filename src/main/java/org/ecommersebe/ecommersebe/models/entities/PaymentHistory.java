@@ -22,7 +22,16 @@ public class PaymentHistory extends BaseEntity{
     private Long id;
 
     @Column(nullable = false)
+    private Long transactionId;
+
+    @Column(nullable = false)
     private float amount;
+
+    @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false)
+    private LocalDateTime transactionDateTime;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -33,6 +42,6 @@ public class PaymentHistory extends BaseEntity{
     private PaymentType type;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "order_Id", nullable = false)
+    @JoinColumn(name = "order_Id")
     private Order order;
 }

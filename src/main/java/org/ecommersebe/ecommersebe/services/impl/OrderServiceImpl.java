@@ -4,12 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.ecommersebe.ecommersebe.models.entities.*;
 import org.ecommersebe.ecommersebe.models.enums.OrderStatus;
 import org.ecommersebe.ecommersebe.models.enums.PaymentStatus;
+import org.ecommersebe.ecommersebe.models.enums.PaymentType;
 import org.ecommersebe.ecommersebe.models.exception.ResourceNotFoundException;
-import org.ecommersebe.ecommersebe.models.payload.dto.order.OrderDetailResponse;
-import org.ecommersebe.ecommersebe.models.payload.dto.order.OrderRequest;
-import org.ecommersebe.ecommersebe.models.payload.dto.order.OrderResponse;
-import org.ecommersebe.ecommersebe.models.payload.dto.order.SearchOrderRequest;
-import org.ecommersebe.ecommersebe.models.payload.dto.payment.PaymentHistoryResponse;
+import org.ecommersebe.ecommersebe.models.payload.dto.order.*;
 import org.ecommersebe.ecommersebe.repositories.OrderDetailRepository;
 import org.ecommersebe.ecommersebe.repositories.OrderRepository;
 import org.ecommersebe.ecommersebe.repositories.PaymentRepository;
@@ -35,7 +32,6 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -45,9 +41,9 @@ public class OrderServiceImpl implements OrderService {
     private final OrderDetailService orderDetailService;
     private final UserRepository userRepository;
     private final OrderDetailRepository orderDetailRepository;
+    private final PaymentRepository paymentRepository;
     private final EmailService emailService;
     private final ModelMapper modelMapper;
-    private final PaymentRepository paymentRepository;
 
     @Override
     public OrderResponse get(Long orderId) {
@@ -123,7 +119,6 @@ public class OrderServiceImpl implements OrderService {
         return mapToOrderResponse(orderRepository.save(order));
     }
 
-
     @Override
     public OrderResponse add(OrderRequest request) {
         // Create Order
@@ -134,7 +129,7 @@ public class OrderServiceImpl implements OrderService {
         order.setEmail(request.getEmail());
         order.setFullName(request.getFullName());
         order.setPhone(request.getPhone());
-
+        order.setOrderCode(generateOrderCode());
 
         // Create OrderDetails
         List<OrderDetail> orderDetails = orderDetailService.create(request.getCartItems(), order);
@@ -160,76 +155,80 @@ public class OrderServiceImpl implements OrderService {
         orderDetailRepository.saveAll(orderDetails);
         order.setOrderDetails(new HashSet<>(orderDetails));
 
-        // create PaymentHistory
-        PaymentHistory paymentHistory = new PaymentHistory();
-        paymentHistory.setType(request.getType());
-        paymentHistory.setAmount(order.getTotalAmount());
-        paymentHistory.setStatus(PaymentStatus.UNPAID);
-        paymentHistory.setOrder(orderCreated);
-        paymentRepository.save(paymentHistory);
+        paymentRepository.save(PaymentHistory.builder()
+                .transactionId(order.getOrderCode())
+                .amount(order.getTotalAmount())
+                .description("Cash on Delivery - Order #" + orderCreated.getId())
+                .transactionDateTime(LocalDateTime.now())
+                .status(PaymentStatus.UNPAID)
+                .type(request.getType())
+                .order(order)
+                .build());
 
-        // Format ngày theo dd-MM-yyyy HH:mm:ss
-        String formattedDate = order.getCreatedDate()
-                .format(DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy"));
+        if(request.getType() == PaymentType.CASH){
+            // Format ngày theo dd-MM-yyyy HH:mm:ss
+            String formattedDate = order.getCreatedDate()
+                    .format(DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy"));
 
-        // Build email content with product list
-        StringBuilder productsHtml = new StringBuilder();
-        for (OrderDetail detail : orderDetails) {
-            productsHtml.append("<tr>")
-                    .append("<td style='text-align:center;'>")
-                    .append("<img src=\"").append(detail.getProduct().getImage().split(",")[0])
-                    .append("\" width='60' height='60' style='border-radius:8px; display:block;'/>")
-                    .append("</td>")
-                    .append("<td style='text-align:center;'>").append(detail.getProduct().getName()).append("</td>")
-                    .append("<td style='text-align:center;'>").append(detail.getQuantity()).append("</td>")
-                    .append("<td style='text-align:center;'>").append(CurrencyUtils.formatPrice(detail.getProduct().getPrice())).append("</td>")
-                    .append("<td style='text-align:center;'>").append(CurrencyUtils.formatPrice(detail.getTotalPrice())).append("</td>")
-                    .append("</tr>");
+            // Build email content with product list
+            StringBuilder productsHtml = new StringBuilder();
+            for (OrderDetail detail : orderDetails) {
+                productsHtml.append("<tr>")
+                        .append("<td style='text-align:center;'>")
+                        .append("<img src=\"").append(detail.getProduct().getImage().split(",")[0])
+                        .append("\" width='60' height='60' style='border-radius:8px; display:block;'/>")
+                        .append("</td>")
+                        .append("<td style='text-align:center;'>").append(detail.getProduct().getName()).append("</td>")
+                        .append("<td style='text-align:center;'>").append(detail.getQuantity()).append("</td>")
+                        .append("<td style='text-align:center;'>").append(CurrencyUtils.formatPrice(detail.getProduct().getPrice())).append("</td>")
+                        .append("<td style='text-align:center;'>").append(CurrencyUtils.formatPrice(detail.getTotalPrice())).append("</td>")
+                        .append("</tr>");
+            }
+
+            String content = "<html><head><style>"
+                    + "body {font-family:'Segoe UI',Roboto,Arial,sans-serif; background:#f4f6f9; margin:0; padding:20px;}"
+                    + ".container {max-width:720px; margin:auto; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.08);}"
+                    + ".header {background: linear-gradient(135deg, #2c2c2c, #000000); padding:24px; color:#fff; text-align:center;}"
+                    + ".header h2 {margin:0; font-size:22px;}"
+                    + ".status-box {margin:20px 0; padding:15px; background: #f0f0f0; border-left:5px solid #000000; border-radius:8px; font-size:15px; color:#222; font-weight:bold;}"
+                    + "table {width:100%; border-collapse:collapse; margin-top:20px;}"
+                    + "th,td {padding:12px; border-bottom:1px solid #eee; font-size:14px;}"
+                    + "th {background:#f9fafb; color:#555; text-transform:uppercase; font-size:12px; letter-spacing:0.5px; text-align: left;}"
+                    + ".footer {background:#f9fafb; padding:18px; text-align:center; font-size:13px; color:#777; margin-top:30px;}"
+                    + ".product-img {\n" +
+                    "      border-radius: 8px;\n" +
+                    "      display: block;\n" +
+                    "    }"
+                    + ".text-center { text-align: center; }"
+                    + ".text-right { text-align: right; }"
+                    + "</style></head><body>"
+                    + "<div class='container'>"
+                    + "<div class='header'><h2>🎉 Đơn hàng #" + order.getId() + " đã được xác nhận</h2></div>"
+                    + "<div style='padding:24px;'>"
+                    + "<p>Xin chào <b>" + request.getFullName() + "</b>,</p>"
+                    + "<p>Cảm ơn bạn đã đặt hàng tại <b>ECommerse</b>! Dưới đây là thông tin chi tiết:</p>"
+                    + "<div class='status-box'>Trạng thái: " + order.getStatus() + "</div>"
+                    + "<table>"
+                    + "<tr><th>Mã đơn hàng</th><td>" + order.getId() + "</td></tr>"
+                    + "<tr><th>Ngày đặt</th><td>" + formattedDate + "</td></tr>"
+                    + "<tr><th>Địa chỉ giao hàng</th><td>" + order.getAddress().split("//")[0] + ", " + order.getAddress().split("//")[1] + "</td></tr>"
+                    + "<tr><th>Tổng giá trị</th><td><b>" + CurrencyUtils.formatPrice(order.getTotalAmount()) + "</b></td></tr>"
+                    + "</table>"
+                    + "<h3>Danh sách sản phẩm</h3>"
+                    + "<table>"
+                    + "<tr><th></th><th style='text-align:center;'>Sản phẩm</th><th style='text-align:center;'>SL</th><th style='text-align:center;'>Đơn giá</th><th style='text-align:center;'>Thành tiền</th></tr>"
+                    + productsHtml
+                    + "</table>"
+                    + "<div class='footer'>Cảm ơn bạn đã mua sắm tại <b>ECommerse</b>.<br/>Chúng tôi sẽ sớm liên hệ về giao hàng.</div>"
+                    + "</div></div></body></html>";
+
+            // Send email
+            emailService.sendEmail(
+                    request.getEmail(),
+                    "[ECommerse] - Xác nhận đơn hàng #" + order.getId(),
+                    content
+            );
         }
-
-        String content = "<html><head><style>"
-                + "body {font-family:'Segoe UI',Roboto,Arial,sans-serif; background:#f4f6f9; margin:0; padding:20px;}"
-                + ".container {max-width:720px; margin:auto; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.08);}"
-                + ".header {background: linear-gradient(135deg, #2c2c2c, #000000); padding:24px; color:#fff; text-align:center;}"
-                + ".header h2 {margin:0; font-size:22px;}"
-                + ".status-box {margin:20px 0; padding:15px; background: #f0f0f0; border-left:5px solid #000000; border-radius:8px; font-size:15px; color:#222; font-weight:bold;}"
-                + "table {width:100%; border-collapse:collapse; margin-top:20px;}"
-                + "th,td {padding:12px; border-bottom:1px solid #eee; font-size:14px;}"
-                + "th {background:#f9fafb; color:#555; text-transform:uppercase; font-size:12px; letter-spacing:0.5px; text-align: left;}"
-                + ".footer {background:#f9fafb; padding:18px; text-align:center; font-size:13px; color:#777; margin-top:30px;}"
-                + ".product-img {\n" +
-                "      border-radius: 8px;\n" +
-                "      display: block;\n" +
-                "    }"
-                + ".text-center { text-align: center; }"
-                + ".text-right { text-align: right; }"
-                + "</style></head><body>"
-                + "<div class='container'>"
-                + "<div class='header'><h2>🎉 Đơn hàng #" + order.getId() + " đã được xác nhận</h2></div>"
-                + "<div style='padding:24px;'>"
-                + "<p>Xin chào <b>" + request.getFullName() + "</b>,</p>"
-                + "<p>Cảm ơn bạn đã đặt hàng tại <b>ECommerse</b>! Dưới đây là thông tin chi tiết:</p>"
-                + "<div class='status-box'>Trạng thái: " + order.getStatus() + "</div>"
-                + "<table>"
-                + "<tr><th>Mã đơn hàng</th><td>" + order.getId() + "</td></tr>"
-                + "<tr><th>Ngày đặt</th><td>" + formattedDate + "</td></tr>"
-                + "<tr><th>Địa chỉ giao hàng</th><td>" + order.getAddress() + "</td></tr>"
-                + "<tr><th>Tổng giá trị</th><td><b>" + CurrencyUtils.formatPrice(order.getTotalAmount()) + "</b></td></tr>"
-                + "</table>"
-                + "<h3>Danh sách sản phẩm</h3>"
-                + "<table>"
-                + "<tr><th></th><th style='text-align:center;'>Sản phẩm</th><th style='text-align:center;'>SL</th><th style='text-align:center;'>Đơn giá</th><th style='text-align:center;'>Thành tiền</th></tr>"
-                + productsHtml
-                + "</table>"
-                + "<div class='footer'>Cảm ơn bạn đã mua sắm tại <b>ECommerse</b>.<br/>Chúng tôi sẽ sớm liên hệ về giao hàng.</div>"
-                + "</div></div></body></html>";
-
-        // Send email
-        emailService.sendEmail(
-                request.getEmail(),
-                "[ECommerse] - Xác nhận đơn hàng #" + order.getId(),
-                content
-        );
 
         return mapToOrderResponse(orderCreated);
     }
@@ -238,8 +237,10 @@ public class OrderServiceImpl implements OrderService {
     public Page<OrderResponse> searchOrders(int pageNo, int pageSize, String sortBy, String sortDir, SearchOrderRequest request, boolean isCustomer) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-        Specification<Order> specification = specification(toSearchParams(request));
-        Page<Order> pageResults;
+        Specification<Order> specification = Specification.allOf();
+        if (request != null) {
+            specification = specification.and(specification(toSearchParams(request)));
+        }
 
         if(isCustomer) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -250,9 +251,27 @@ public class OrderServiceImpl implements OrderService {
             specification = specification.and(GenericSpecification.joinFieldEqual("user", "id", user.getId()));
         }
 
-        pageResults = orderRepository.findAll(specification, pageable);
+        Page<Order> pageResults = orderRepository.findAll(specification, pageable);
 
         return pageResults.map(this::mapToOrderResponse);
+    }
+
+    @Override
+    public OrderInfo getOrderInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        User user = userRepository.findByEmailOrPhone(userName, userName)
+                .orElseThrow(() -> new ResourceNotFoundException("User"));
+
+        List<Order> result = orderRepository.findByUserIdAndStatus(user.getId(), OrderStatus.COMPLETED);
+
+        int numberOfOrder = result.size();
+
+        float totalPrice = (float) result.stream()
+                .mapToDouble(Order::getTotalAmount)
+                .sum();
+
+        return new OrderInfo(numberOfOrder, totalPrice);
     }
 
     private Specification<Order> specification(Map<String, Object> searchParams) {
@@ -330,5 +349,10 @@ public class OrderServiceImpl implements OrderService {
         orderResponse.setOrderDetails(modelMapper.map(order.getOrderDetails(), listType));
 
         return orderResponse;
+    }
+
+    private Long generateOrderCode() {
+        String raw = "" + System.currentTimeMillis() ;
+        return Long.parseLong(raw.substring(0, Math.min(raw.length(), 18)));
     }
 }

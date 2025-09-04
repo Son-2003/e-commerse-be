@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.ecommersebe.ecommersebe.models.constants.AppConstants;
 import org.ecommersebe.ecommersebe.models.enums.OrderStatus;
+import org.ecommersebe.ecommersebe.models.payload.dto.order.OrderInfo;
 import org.ecommersebe.ecommersebe.models.payload.dto.order.OrderRequest;
 import org.ecommersebe.ecommersebe.models.payload.dto.order.OrderResponse;
 import org.ecommersebe.ecommersebe.models.payload.dto.order.SearchOrderRequest;
@@ -60,6 +61,14 @@ public class OrderController {
 
     @ApiResponse(responseCode = "200", description = "Http Status 200 OK")
     @SecurityRequirement(name = "Bear Authentication")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @GetMapping("/info")
+    public ResponseEntity<OrderInfo> getOrderInfoOfCustomer() {
+        return ResponseEntity.ok(orderService.getOrderInfo());
+    }
+
+    @ApiResponse(responseCode = "200", description = "Http Status 200 OK")
+    @SecurityRequirement(name = "Bear Authentication")
     @PostMapping
     public ResponseEntity<OrderResponse> addOrder(@RequestBody @Valid OrderRequest request) {
         return ResponseEntity.ok(orderService.add(request));
@@ -67,7 +76,7 @@ public class OrderController {
 
     @ApiResponse(responseCode = "200", description = "Http Status 200 OK")
     @SecurityRequirement(name = "Bear Authentication")
-    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'CUSTOMER')")
     @PutMapping
     public ResponseEntity<OrderResponse> updateOrder(@RequestParam Long orderId, @RequestParam OrderStatus status, @RequestParam @Nullable String note) {
         return ResponseEntity.ok(orderService.update(orderId, status, note));

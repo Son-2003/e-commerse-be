@@ -22,6 +22,9 @@ public class Order extends BaseEntity{
     private Long id;
 
     @Column(nullable = false)
+    private Long orderCode;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
@@ -52,8 +55,8 @@ public class Order extends BaseEntity{
     @OneToOne(mappedBy = "order")
     private PaymentHistory paymentHistory;
 
-    @OneToOne(mappedBy = "order")
-    private Feedback feedback;
+    @OneToMany(mappedBy = "order")
+    private Set<Feedback> feedbacks;
 
     @OneToMany(mappedBy = "order")
     private Set<OrderDetail> orderDetails;

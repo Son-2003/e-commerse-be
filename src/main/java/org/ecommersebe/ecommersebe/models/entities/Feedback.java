@@ -2,6 +2,7 @@ package org.ecommersebe.ecommersebe.models.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.ecommersebe.ecommersebe.models.enums.EntityStatus;
 import org.hibernate.Length;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -24,8 +25,14 @@ public class Feedback extends BaseEntity{
     @Column(nullable = true)
     private String comment;
 
+    @Column(nullable = false)
+    private boolean isUpdated = false;
+
     @Column(nullable = true, length = Length.LOB_DEFAULT)
     private String image;
+
+    @Column(nullable = false)
+    private EntityStatus status = EntityStatus.ACTIVE;
 
     @ManyToOne
     @JoinColumn(name = "product_Id", nullable = false)
@@ -35,7 +42,7 @@ public class Feedback extends BaseEntity{
     @JoinColumn(name = "user_Id", nullable = false)
     private User user;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "order_Id", nullable = false)
     private Order order;
 }
