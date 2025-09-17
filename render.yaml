@@ -10,7 +10,7 @@ services:
       - key: SPRING_PROFILES_ACTIVE
         value: production
       - key: SPRING_DATA_MONGODB_URI
-        value: mongodb://e-commerse:e-commerse@e-commerse-mongo:27017/chat_app?authSource=admin
+        value: mongodb://e-commerse:e-commerse@e-commerse-mongo:27017/chat_app?authSource=admin&connectTimeoutMS=30000&serverSelectionTimeoutMS=30000
 
   - type: pserv
     name: e-commerse-mongo
