@@ -10,6 +10,34 @@ services:
       - key: SPRING_PROFILES_ACTIVE
         value: production
 
+      # Lấy hostname của private service (render sẽ điền đúng giá trị)
+      - key: SPRING_DATA_MONGODB_HOST
+        fromService:
+          name: e-commerse-mongo
+          type: pserv
+          property: host
+
+      # Lấy port của service
+      - key: SPRING_DATA_MONGODB_PORT
+        fromService:
+          name: e-commerse-mongo
+          type: pserv
+          property: port
+
+      # Lấy username mà bạn đã đặt trong pserv (env var của service Mongo)
+      - key: SPRING_DATA_MONGODB_USERNAME
+        fromService:
+          name: e-commerse-mongo
+          type: pserv
+          envVarKey: MONGO_INITDB_ROOT_USERNAME
+
+      # Lấy password từ env var của service Mongo (Render sẽ inject)
+      - key: SPRING_DATA_MONGODB_PASSWORD
+        fromService:
+          name: e-commerse-mongo
+          type: pserv
+          envVarKey: MONGO_INITDB_ROOT_PASSWORD
+
   - type: pserv
     name: e-commerse-mongo
     runtime: image
