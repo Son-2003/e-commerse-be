@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: e-commerse-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: SPRING_DATA_MONGODB_URI
+        value: mongodb://e-commerse:${MONGO_INITDB_ROOT_PASSWORD}@e-commerse-mongo:27017/chat_app?authSource=admin
+
+  - type: pserv
+    name: e-commerse-mongo
+    runtime: image
+    image: mongo:6.0
+    plan: standard
+    disk:
+      name: mongo-data
+      mountPath: /data/db
+      sizeGB: 10
+    envVars:
+      - key: MONGO_INITDB_ROOT_USERNAME
+        value: e-commerse
+      - key: MONGO_INITDB_ROOT_PASSWORD
+        value: e-commerse
+      - key: MONGO_INITDB_DATABASE
+        value: chat_app

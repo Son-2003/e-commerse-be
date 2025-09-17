@@ -54,12 +54,36 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmailOrPhone(signInRequest.getEmailOrPhone(), signInRequest.getEmailOrPhone()).orElseThrow(
                 () -> new ResourceNotFoundException("User")
         );
-        String accessToken = jwtTokenProvider.generateAccessToken(user);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(user);
+        if(user.getRole() == RoleType.CUSTOMER){
+            String accessToken = jwtTokenProvider.generateAccessToken(user);
+            String refreshToken = jwtTokenProvider.generateRefreshToken(user);
 
-        revokeAllTokenByUser(user);
-        saveUserToken(accessToken, refreshToken, user);
-        return new JWTAuthResponse(accessToken, refreshToken, "User login was successful");
+            revokeAllTokenByUser(user);
+            saveUserToken(accessToken, refreshToken, user);
+            return new JWTAuthResponse(accessToken, refreshToken, "User login was successful");
+        }else {
+            throw new ECommerseException(HttpStatus.BAD_REQUEST, "You don't have permission to access here!");
+        }
+    }
+
+    @Override
+    public JWTAuthResponse signInAdmin(SignInRequest signInRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(signInRequest.getEmailOrPhone(), signInRequest.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        User user = userRepository.findByEmailOrPhone(signInRequest.getEmailOrPhone(), signInRequest.getEmailOrPhone()).orElseThrow(
+                () -> new ResourceNotFoundException("User")
+        );
+        if(user.getRole() != RoleType.CUSTOMER){
+            String accessToken = jwtTokenProvider.generateAccessToken(user);
+            String refreshToken = jwtTokenProvider.generateRefreshToken(user);
+
+            revokeAllTokenByUser(user);
+            saveUserToken(accessToken, refreshToken, user);
+            return new JWTAuthResponse(accessToken, refreshToken, "User login was successful");
+        }else {
+            throw new ECommerseException(HttpStatus.BAD_REQUEST, "You don't have permission to access here!");
+        }
     }
 
     @Override

@@ -38,6 +38,18 @@ public class AuthController {
     }
 
     @Operation(
+            summary = "Sign in admin, staff",
+            description = "Sign in admin, staff by Email, Phone"
+    )
+    @PostMapping("/login/admin")
+    public ResponseEntity<JWTAuthResponse> signInAdmin(@Valid @RequestBody SignInRequest signInRequest){
+        JWTAuthResponse jwtAuthResponse = authService.signInAdmin(signInRequest);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + jwtAuthResponse.getAccessToken());
+        return new ResponseEntity<>(jwtAuthResponse, headers, HttpStatus.OK);
+    }
+
+    @Operation(
             summary = "Sign up customer"
     )
     @PostMapping(value = "/register/customer")

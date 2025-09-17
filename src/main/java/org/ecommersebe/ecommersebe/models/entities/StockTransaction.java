@@ -2,6 +2,7 @@ package org.ecommersebe.ecommersebe.models.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.ecommersebe.ecommersebe.models.enums.EntityStatus;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -29,7 +30,28 @@ public class StockTransaction extends BaseEntity{
     private int importQuantity;
 
     @Column(nullable = false)
+    private float unitPrice;
+
+    @Column(nullable = false)
     private float totalPrice;
+
+    @Column(nullable = false)
+    private String supplierName;
+
+    @Column(nullable = false)
+    private String importedBy;
+
+    @Column(nullable = false)
+    private EntityStatus status;
+
+    @Column(nullable = false)
+    private String imageEvidence;
+
+    @Column(nullable = false)
+    private String imageInvoice;
+
+    @Column(nullable = false)
+    private String note;
 
     @ManyToOne
     @JoinColumn(name = "product_Id", nullable = false)

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 
 public interface AuthService{
     JWTAuthResponse signInUser(SignInRequest loginDto);
+    JWTAuthResponse signInAdmin(SignInRequest loginDto);
     JWTAuthResponse signUpCustomer(SignUpRequest signupDto);
     JWTAuthResponse signUpStaff(SignUpRequest signupDto);
     UserResponse getUserInfo();
