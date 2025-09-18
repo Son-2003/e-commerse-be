@@ -12,6 +12,28 @@ services:
       MONGO_INITDB_DATABASE: chat_app
     volumes:
       - mongo_data:/data/db
-
+    networks:
+      - e-commerse_network
+    
+  app:
+    image: ducson29/e-commerse-be:latest
+    container_name: e-commerse_be_container
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
+      - PAYOS_API_KEY=${PAYOS_API_KEY}
+      - PAYOS_CHECKSUM_KEY=${PAYOS_CHECKSUM_KEY}
+      - PAYOS_CLIENT_ID=${PAYOS_CLIENT_ID}
+    depends_on:
+      - mongo
+    networks:
+      - e-commerse_network
+      
 volumes:
   mongo_data:
+  
+networks:
+  e-commerse_network:
