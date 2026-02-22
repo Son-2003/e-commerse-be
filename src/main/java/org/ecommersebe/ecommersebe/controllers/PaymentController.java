@@ -1,6 +1,5 @@
 package org.ecommersebe.ecommersebe.controllers;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -9,7 +8,6 @@ import org.ecommersebe.ecommersebe.models.payload.dto.payment.CreatePaymentReque
 import org.ecommersebe.ecommersebe.models.payload.dto.payment.WebhookUrlDto;
 import org.ecommersebe.ecommersebe.services.PayOSService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import vn.payos.type.CheckoutResponseData;
 
@@ -33,8 +31,13 @@ public class PaymentController {
         return ResponseEntity.ok(payOSService.confirmWebhook(webhookUrlDto));
     }
 
-    @PostMapping(value = "/payos-transfer-handler")
-    public void payosTransferHandler(@RequestBody ObjectNode body) throws Exception {
-        payOSService.payOsTransferHandler(body);
+    @PostMapping("/payos-transfer-handler")
+    public ResponseEntity<String> payosTransferHandler(@RequestBody String rawBody) {
+        try {
+            payOSService.payOsTransferHandler(rawBody);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok("OK");
     }
 }

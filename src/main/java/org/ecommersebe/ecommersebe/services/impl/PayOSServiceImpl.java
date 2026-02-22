@@ -1,7 +1,6 @@
 package org.ecommersebe.ecommersebe.services.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.ecommersebe.ecommersebe.models.entities.Order;
 import org.ecommersebe.ecommersebe.models.entities.OrderDetail;
@@ -42,15 +41,16 @@ public class PayOSServiceImpl implements PayOSService {
         for(CartItem cartItem : request.getCartItems()) {
             Product product = productRepository.findById(cartItem.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product", "id", cartItem.getId()));
+            int unitPrice = (int) (product.getPrice() * 1000);
             items.add(ItemData.builder()
                     .name(product.getName())
                     .quantity(cartItem.getQuantity())
-                    .price(Math.round(product.getPrice() * cartItem.getQuantity() * 1000))
+                    .price(unitPrice)
                     .build());
         }
 
         int totalAmount = items.stream()
-                .mapToInt(ItemData::getPrice)
+                .mapToInt(item -> item.getPrice() * item.getQuantity())
                 .sum();
 
         int shippingFee = 10000;
@@ -60,8 +60,6 @@ public class PayOSServiceImpl implements PayOSService {
                 .orderCode(request.getOrderCode())
                 .amount(totalAmount + shippingFee)
                 .description("Thanh toán đơn hàng")
-                .returnUrl(domain)
-                .cancelUrl(domain)
                 .items(items)
                 .returnUrl(request.getReturnUrl())
                 .cancelUrl(request.getCancelUrl())
@@ -70,8 +68,9 @@ public class PayOSServiceImpl implements PayOSService {
         try {
             return payOS.createPaymentLink(paymentData);
         } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi tạo payment link", e);
+            e.printStackTrace();
         }
+        return null;
     }
 
     @Override
@@ -84,10 +83,10 @@ public class PayOSServiceImpl implements PayOSService {
     }
 
     @Override
-    public void payOsTransferHandler(ObjectNode body) {
+    public void payOsTransferHandler(String rawBody) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            Webhook webhookBody = objectMapper.treeToValue(body, Webhook.class);
+            Webhook webhookBody = objectMapper.readValue(rawBody, Webhook.class);
 
             WebhookData data = payOS.verifyPaymentWebhookData(webhookBody);
 
@@ -97,7 +96,6 @@ public class PayOSServiceImpl implements PayOSService {
             Order order = paymentHistory.getOrder();
 
             if ("00".equals(data.getCode()) && webhookBody.getSuccess()) {
-
                 paymentHistory.setStatus(PaymentStatus.PAID);
                 paymentHistory.setDescription("PayOS Bank Payment - Order #" + order.getId());
             } else {
@@ -169,7 +167,7 @@ public class PayOSServiceImpl implements PayOSService {
             );
 
         } catch (Exception e) {
-            throw new PayOSException("Error handling PayOS webhook: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
