@@ -24,6 +24,7 @@ public class OrderResponse {
      float totalAmount;
      String address;
      UserResponse user;
+     String note;
      PaymentHistoryResponse paymentHistory;
      FeedbackResponse feedback;
      List<OrderDetailResponse> orderDetails;

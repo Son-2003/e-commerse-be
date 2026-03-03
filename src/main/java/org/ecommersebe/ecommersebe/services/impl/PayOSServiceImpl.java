@@ -1,6 +1,7 @@
 package org.ecommersebe.ecommersebe.services.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.ecommersebe.ecommersebe.models.entities.Order;
 import org.ecommersebe.ecommersebe.models.entities.OrderDetail;
@@ -41,16 +42,15 @@ public class PayOSServiceImpl implements PayOSService {
         for(CartItem cartItem : request.getCartItems()) {
             Product product = productRepository.findById(cartItem.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product", "id", cartItem.getId()));
-            int unitPrice = (int) (product.getPrice() * 1000);
             items.add(ItemData.builder()
                     .name(product.getName())
                     .quantity(cartItem.getQuantity())
-                    .price(unitPrice)
+                    .price(Math.round(product.getPrice() * cartItem.getQuantity() * 1000))
                     .build());
         }
 
         int totalAmount = items.stream()
-                .mapToInt(item -> item.getPrice() * item.getQuantity())
+                .mapToInt(ItemData::getPrice)
                 .sum();
 
         int shippingFee = 10000;
@@ -68,9 +68,8 @@ public class PayOSServiceImpl implements PayOSService {
         try {
             return payOS.createPaymentLink(paymentData);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi tạo payment link", e);
         }
-        return null;
     }
 
     @Override
@@ -83,10 +82,13 @@ public class PayOSServiceImpl implements PayOSService {
     }
 
     @Override
-    public void payOsTransferHandler(String rawBody) {
+    public void payOsTransferHandler(ObjectNode body) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            Webhook webhookBody = objectMapper.readValue(rawBody, Webhook.class);
+            Webhook webhookBody = objectMapper.treeToValue(body, Webhook.class);
+            if (webhookBody.getSuccess() == null) {
+                webhookBody.setSuccess(true);
+            }
 
             WebhookData data = payOS.verifyPaymentWebhookData(webhookBody);
 
@@ -94,8 +96,7 @@ public class PayOSServiceImpl implements PayOSService {
                     .findByTransactionId(data.getOrderCode())
                     .orElseThrow(() -> new ResourceNotFoundException("Payment"));
             Order order = paymentHistory.getOrder();
-
-            if ("00".equals(data.getCode()) && webhookBody.getSuccess()) {
+            if (data.getCode().equals("00") && webhookBody.getSuccess()) {
                 paymentHistory.setStatus(PaymentStatus.PAID);
                 paymentHistory.setDescription("PayOS Bank Payment - Order #" + order.getId());
             } else {
@@ -167,7 +168,7 @@ public class PayOSServiceImpl implements PayOSService {
             );
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new PayOSException("Error handling PayOS webhook: " + e.getMessage());
         }
     }
 

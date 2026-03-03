@@ -1,5 +1,6 @@
 package org.ecommersebe.ecommersebe.controllers;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -31,13 +32,8 @@ public class PaymentController {
         return ResponseEntity.ok(payOSService.confirmWebhook(webhookUrlDto));
     }
 
-    @PostMapping("/payos-transfer-handler")
-    public ResponseEntity<String> payosTransferHandler(@RequestBody String rawBody) {
-        try {
-            payOSService.payOsTransferHandler(rawBody);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return ResponseEntity.ok("OK");
+    @PostMapping(value = "/payos-transfer-handler")
+    public void payosTransferHandler(@RequestBody ObjectNode body) throws Exception {
+        payOSService.payOsTransferHandler(body);
     }
 }
