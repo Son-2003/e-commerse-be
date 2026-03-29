@@ -3,6 +3,7 @@ package org.ecommersebe.ecommersebe.services.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
+import org.ecommersebe.ecommersebe.config.PayOSConfig;
 import org.ecommersebe.ecommersebe.models.entities.Order;
 import org.ecommersebe.ecommersebe.models.entities.OrderDetail;
 import org.ecommersebe.ecommersebe.models.entities.PaymentHistory;
@@ -20,8 +21,12 @@ import org.ecommersebe.ecommersebe.services.PayOSService;
 import org.ecommersebe.ecommersebe.utils.CurrencyUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import vn.payos.PayOS;
-import vn.payos.type.*;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkRequest;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
+import vn.payos.model.webhooks.Webhook;
+import vn.payos.model.webhooks.WebhookData;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -37,45 +42,39 @@ public class PayOSServiceImpl implements PayOSService {
     private final PayOS payOS;
 
     @Override
-    public CheckoutResponseData createEmbeddedPaymentLink(CreatePaymentRequest request) {
-        List<ItemData> items = new ArrayList<>();
-        for(CartItem cartItem : request.getCartItems()) {
+    public CreatePaymentLinkResponse createEmbeddedPaymentLink(CreatePaymentRequest request) {
+        int totalItemsAmount = 0;
+        for (CartItem cartItem : request.getCartItems()) {
             Product product = productRepository.findById(cartItem.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product", "id", cartItem.getId()));
-            items.add(ItemData.builder()
-                    .name(product.getName())
-                    .quantity(cartItem.getQuantity())
-                    .price(Math.round(product.getPrice() * cartItem.getQuantity() * 1000))
-                    .build());
+
+            int unitPrice = Math.round(product.getPrice() * 1000);
+            totalItemsAmount += (unitPrice * cartItem.getQuantity());
         }
 
-        int totalAmount = items.stream()
-                .mapToInt(ItemData::getPrice)
-                .sum();
-
         int shippingFee = 10000;
-        String domain = "http://localhost:8080/";
-        PaymentData paymentData = PaymentData
-                .builder()
+        long finalTotalAmount = totalItemsAmount + shippingFee;
+
+        CreatePaymentLinkRequest paymentData = CreatePaymentLinkRequest.builder()
                 .orderCode(request.getOrderCode())
-                .amount(totalAmount + shippingFee)
-                .description("Thanh toán đơn hàng")
-                .items(items)
+                .amount(finalTotalAmount)
+                .description("Thanh toan don hang")
                 .returnUrl(request.getReturnUrl())
                 .cancelUrl(request.getCancelUrl())
                 .build();
 
         try {
-            return payOS.createPaymentLink(paymentData);
+            return payOS.paymentRequests().create(paymentData);
         } catch (Exception e) {
-            throw new RuntimeException("Lỗi khi tạo payment link", e);
+            throw new RuntimeException("Lỗi khi tạo payment link: " + e.getMessage(), e);
         }
     }
 
     @Override
     public String confirmWebhook(WebhookUrlDto webhookUrlDto) {
         try {
-            return payOS.confirmWebhook(webhookUrlDto.getWebhookUrl());
+            payOS.webhooks().confirm(webhookUrlDto.getWebhookUrl());
+            return "Webhook confirmed successfully";
         } catch (Exception e) {
             throw new PayOSException(e.getMessage());
         }
@@ -90,7 +89,7 @@ public class PayOSServiceImpl implements PayOSService {
                 webhookBody.setSuccess(true);
             }
 
-            WebhookData data = payOS.verifyPaymentWebhookData(webhookBody);
+            WebhookData data = payOS.webhooks().verify(webhookBody);
 
             PaymentHistory paymentHistory = paymentRepository
                     .findByTransactionId(data.getOrderCode())
@@ -104,11 +103,10 @@ public class PayOSServiceImpl implements PayOSService {
             }
             paymentRepository.save(paymentHistory);
 
-            // Format ngày theo dd-MM-yyyy HH:mm:ss
             String formattedDate = order.getCreatedDate()
                     .format(DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy"));
 
-            // Build email content with product list
+            // Email builder (Giữ nguyên logic cực kỳ hoàn chỉnh của bạn)
             StringBuilder productsHtml = new StringBuilder();
             for (OrderDetail detail : order.getOrderDetails()) {
                 productsHtml.append("<tr>")
@@ -160,7 +158,6 @@ public class PayOSServiceImpl implements PayOSService {
                     + "<div class='footer'>Cảm ơn bạn đã mua sắm tại <b>ECommerse</b>.<br/>Chúng tôi sẽ sớm liên hệ về giao hàng.</div>"
                     + "</div></div></body></html>";
 
-            // Send email
             emailService.sendEmail(
                     order.getEmail(),
                     "[ECommerse] - Xác nhận đơn hàng #" + order.getId(),
@@ -171,5 +168,4 @@ public class PayOSServiceImpl implements PayOSService {
             throw new PayOSException("Error handling PayOS webhook: " + e.getMessage());
         }
     }
-
 }

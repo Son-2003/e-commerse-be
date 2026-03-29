@@ -10,7 +10,7 @@ import org.ecommersebe.ecommersebe.models.payload.dto.payment.WebhookUrlDto;
 import org.ecommersebe.ecommersebe.services.PayOSService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.payos.type.CheckoutResponseData;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
 
 
 
@@ -23,7 +23,7 @@ public class PaymentController {
     @ApiResponse(responseCode = "201", description = "Http Status 201 Created")
     @SecurityRequirement(name = "Bear Authentication")
     @PostMapping("/link")
-    public ResponseEntity<CheckoutResponseData> createPaymentLink(@RequestBody @Valid CreatePaymentRequest request) {
+    public ResponseEntity<CreatePaymentLinkResponse> createPaymentLink(@RequestBody @Valid CreatePaymentRequest request) {
         return ResponseEntity.ok(payOSService.createEmbeddedPaymentLink(request));
     }
 
